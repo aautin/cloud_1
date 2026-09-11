@@ -1,0 +1,15 @@
+[project]
+name = "cloud-1"
+version = "0.1.0"
+description = "Cloud 1 project for 42 school"
+readme = "README.md"
+authors = [
+    { name = "aautin", email = "alexandreautin.aa@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "ansible>=14.4.0",
+]
+
+[tool.uv]
+package = false

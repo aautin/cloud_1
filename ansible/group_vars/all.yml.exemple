@@ -1,0 +1,15 @@
+app_dir: /opt/cloud_1
+
+mysql_volume_dir: /srv/cloud_1/mysql
+wordpress_volume_dir: /srv/cloud_1/wordpress
+
+db_admin_username: EXEMPLE
+db_admin_host: "%"
+db_admin_password: EXEMPLE
+db_username: EXEMPLE
+db_host: "%"
+db_password: EXEMPLE
+db_name: EXEMPLE
+wp_admin_username: EXEMPLE
+wp_admin_password: EXEMPLE
+wp_admin_email: EXEMPLE

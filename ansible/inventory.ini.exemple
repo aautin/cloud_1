@@ -1,0 +1,2 @@
+[cloud]
+ec2 ansible_host=IP_HOST ansible_user=ubuntu ansible_ssh_private_key_file=PATH_TO_SSH_KEY
