@@ -6,10 +6,8 @@ ANSIBLE=$(VENV)/bin/ansible
 ANSIBLE_PLAYBOOK_BIN=$(VENV)/bin/ansible-playbook
 ANSIBLE_CFG=$(ANSIBLE_DIR)/ansible.cfg
 
-.PHONY: ansible-ping ansible-deploy ansible-install
+.PHONY: ansible-deploy ansible-install
 
-ansible-ping:
-	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE) -i $(ANSIBLE_INVENTORY) cloud -m ping
 ansible-deploy:
 	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE_PLAYBOOK_BIN) -i $(ANSIBLE_INVENTORY) $(ANSIBLE_PLAYBOOK)
 ansible-install:
