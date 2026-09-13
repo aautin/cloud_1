@@ -3,3 +3,5 @@ ansible/group_vars/all.yml
 ansible/.retry
 .venv/
 .env
+*.key
+*.crt
