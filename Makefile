@@ -26,20 +26,20 @@ $(ANSIBLE_PLAYBOOK):
 
 # ---------- LOCAL ----------
 local-down:
-	docker compose down
+	docker-compose down --remove-orphans
 
 local-rm-volumes: local-down
 	docker volume rm cloud_1_db_data
 	docker volume rm cloud_1_wordpress_data
 
 local-deploy: $(NGINX_CERTS)
-	docker compose up -d --build 
+	docker-compose up -d --build
 
 local-logs:
-	docker compose logs -f
+	docker-compose logs -f
 
 local-recreate:
-	docker compose up -d --build --force-recreate
+	docker-compose up -d --build --force-recreate
 # ------------------------------
 
 # ---------- ANSIBLE ----------
