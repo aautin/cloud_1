@@ -1,0 +1,38 @@
+---
+- name: Copy Compose definition
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../docker-compose.yml"
+    dest: "{{ app_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Copy WordPress service files
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../services/wordpress/"
+    dest: "{{ app_dir }}/services/wordpress/"
+    mode: preserve
+
+- name: Copy Nginx configuration
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../services/nginx/conf.d/"
+    dest: "{{ app_dir }}/services/nginx/conf.d/"
+    mode: preserve
+
+- name: Render application environment
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/templates/app.env.j2"
+    dest: "{{ app_dir }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Start application with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d --build
+    chdir: "{{ app_dir }}"
+  register: compose_up
+  changed_when: >-
+    'Created' in compose_up.stdout or
+    'Recreated' in compose_up.stdout or
+    'Built' in compose_up.stdout or
+    'Started' in compose_up.stdout

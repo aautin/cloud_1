@@ -1,1 +1,10 @@
+
 app_dir: /opt/cloud_1
+app_domain:
+wordpress_url: https://
+wordpress_title:
+wordpress_admin_user:
+wordpress_admin_email:
+
+mysql_database:
+mysql_user:

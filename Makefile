@@ -1,10 +1,16 @@
 VENV=.venv
+
 ANSIBLE_DIR=ansible
-ANSIBLE_INVENTORY=$(ANSIBLE_DIR)/inventory.ini
-ANSIBLE_PLAYBOOK=$(ANSIBLE_DIR)/site.yml
-ANSIBLE=$(VENV)/bin/ansible
-ANSIBLE_PLAYBOOK_BIN=$(VENV)/bin/ansible-playbook
-ANSIBLE_CFG=$(ANSIBLE_DIR)/ansible.cfg
+ANSIBLE_INVENTORY=ansible/inventory.ini
+ANSIBLE_PLAYBOOK=ansible/site.yml
+ANSIBLE_CFG=ansible/ansible.cfg
+ANSIBLE_VAULT=ansible/group_vars/vault.yml
+ANSIBLE_REQUIREMENTS = ansible/requirements.yml
+ANSIBLE_TO_CONFIG=ansible/group_vars/all.yml \
+			      ansible/inventory.ini
+
+ANSIBLE_BIN=$(VENV)/bin/ansible-playbook
+ANSIBLE_VAULT_BIN=$(VENV)/bin/ansible-vault
 
 NGINX_DIR      = services/nginx
 NGINX_CERT_KEY = $(NGINX_DIR)/certs/server.key
@@ -12,8 +18,10 @@ NGINX_CERT_CRT = $(NGINX_DIR)/certs/server.crt
 NGINX_CERTS    = $(NGINX_CERT_KEY) $(NGINX_CERT_CRT)
 
 .PHONY: local-down local-recreate local-rm-volumes local-deploy \
-		ansible-deploy
+		ansible-encrypt ansible-collections ansible-deploy 
 
+
+# ---------- LOCAL PREDEPLOYMENT ----------
 $(NGINX_CERTS):
 	mkdir -p services/nginx/certs 
 	openssl req -x509 -nodes -days 365 \
@@ -21,11 +29,25 @@ $(NGINX_CERTS):
 		-keyout $(NGINX_CERT_KEY) \
 		-out $(NGINX_CERT_CRT) \
 		-subj "/CN=localhost"
+# ------------------------------
 
-$(ANSIBLE_PLAYBOOK):
+
+# ---------- ANSIBLE PREDEPLOYMENT ----------
+$(ANSIBLE_BIN):
 	uv sync
 
-# ---------- LOCAL ----------
+$(ANSIBLE_TO_CONFIG):
+	@echo "Please edit $(ANSIBLE_TO_CONFIG) to set your configuration."
+	@echo "Then run 'make ansible-deploy' to deploy the application."
+	@exit 1
+
+$(ANSIBLE_VAULT): $(ANSIBLE_BIN)
+	@echo "Please edit the ansible group_vars/vault.yml file to set your vault variables."
+	$(ANSIBLE_VAULT_BIN) create $@
+# ------------------------------
+
+
+# ---------- LOCAL DEPLOYMENT ----------
 local-down:
 	docker compose down --remove-orphans
 
@@ -43,7 +65,14 @@ local-recreate:
 	docker compose up -d --build --force-recreate
 # ------------------------------
 
-# ---------- ANSIBLE ----------
-ansible-deploy: $(NGINX_CERTS) $(ANSIBLE_PLAYBOOK)
-	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE_PLAYBOOK_BIN) -i $(ANSIBLE_INVENTORY) $(ANSIBLE_PLAYBOOK)
+
+# ---------- ANSIBLE DEPLOYMENT ----------
+ansible-encrypt: $(ANSIBLE_BIN) $(ANSIBLE_VAULT)
+	$(ANSIBLE_VAULT_BIN) encrypt $(ANSIBLE_VAULT)
+
+ansible-collections: $(ANSIBLE_BIN)
+    ansible-galaxy collection install -r $(ANSIBLE_REQUIREMENTS)
+
+ansible-deploy: ansible-collections $(ANSIBLE_BIN) $(ANSIBLE_TO_CONFIG) $(ANSIBLE_VAULT)
+	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE_BIN) --ask-vault-pass -i $(ANSIBLE_INVENTORY) $(ANSIBLE_PLAYBOOK)
 # ------------------------------

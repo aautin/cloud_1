@@ -1,0 +1,22 @@
+---
+- name: Create certificate directory
+  ansible.builtin.file:
+    path: "{{ app_dir }}/services/nginx/certs"
+    state: directory
+    mode: "0755"
+
+- name: Check for existing TLS certificate
+  ansible.builtin.stat:
+    path: "{{ app_dir }}/services/nginx/certs/server.crt"
+  register: tls_certificate
+
+- name: Generate self-signed TLS certificate when absent
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      -keyout {{ app_dir }}/services/nginx/certs/server.key
+      -out {{ app_dir }}/services/nginx/certs/server.crt
+      -subj /CN={{ app_domain }}
+    creates: "{{ app_dir }}/services/nginx/certs/server.crt"
+  when: not tls_certificate.stat.exists
+  no_log: true

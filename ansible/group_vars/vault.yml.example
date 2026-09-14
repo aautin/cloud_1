@@ -1,0 +1,4 @@
+---
+vault_mysql_root_password: 
+vault_mysql_password: 
+vault_wordpress_admin_password: 
