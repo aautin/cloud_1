@@ -21,10 +21,10 @@ fi
 # It sets up the database connection.
 #
 until wp --allow-root core config \
-    --dbname="$WORDPRESS_DB_NAME" \
-    --dbuser="$WORDPRESS_DB_USER" \
-    --dbpass="$WORDPRESS_DB_PASSWORD" \
-    --dbhost="$WORDPRESS_DB_HOST" \
+    --dbname="$MYSQL_DATABASE" \
+    --dbuser="$MYSQL_USER" \
+    --dbpass="$MYSQL_PASSWORD" \
+    --dbhost="db" \
     --path=/var/www/html \
     --skip-check \
     --force; do
