@@ -47,6 +47,17 @@ services:
       wordpress:
         condition: service_healthy
 
+  phpMyAdmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+    networks:
+      - cloud_1
+    depends_on:
+      db:
+        condition: service_healthy
+    
 networks:
   cloud_1:
 
