@@ -11,7 +11,8 @@ NGINX_CERT_KEY = $(NGINX_DIR)/certs/server.key
 NGINX_CERT_CRT = $(NGINX_DIR)/certs/server.crt
 NGINX_CERTS    = $(NGINX_CERT_KEY) $(NGINX_CERT_CRT)
 
-.PHONY: local-down local-rm-volumes local-deploy ansible-deploy
+.PHONY: local-down local-recreate local-rm-volumes local-deploy \
+		ansible-deploy
 
 $(NGINX_CERTS):
 	mkdir -p services/nginx/certs 
@@ -26,20 +27,20 @@ $(ANSIBLE_PLAYBOOK):
 
 # ---------- LOCAL ----------
 local-down:
-	docker-compose down --remove-orphans
+	docker compose down --remove-orphans
 
 local-rm-volumes: local-down
 	docker volume rm cloud_1_db_data
 	docker volume rm cloud_1_wordpress_data
 
 local-deploy: $(NGINX_CERTS)
-	docker-compose up -d --build
+	docker compose up -d --build
 
 local-logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 local-recreate:
-	docker-compose up -d --build --force-recreate
+	docker compose up -d --build --force-recreate
 # ------------------------------
 
 # ---------- ANSIBLE ----------
