@@ -28,7 +28,7 @@
 
 - name: Start application with Docker Compose
   ansible.builtin.command:
-    cmd: docker compose up -d --build
+    cmd: docker compose up -d --force-recreate
     chdir: "{{ app_dir }}"
   register: compose_up
   changed_when: >-

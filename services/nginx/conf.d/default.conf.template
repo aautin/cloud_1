@@ -13,6 +13,12 @@ server {
     ssl_certificate_key /etc/nginx/certs/server.key;
 
     location /phpmyadmin/ {
+        allow 127.0.0.1;
+        allow ::1;
+        allow ${DEPLOYMENT_HOST_IP};
+
+        deny all;
+
         proxy_pass http://phpMyAdmin:80/;
 
         proxy_set_header Host $host;

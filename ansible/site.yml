@@ -1,6 +1,8 @@
 - name: Deploy Cloud 1
   hosts: cloud
   become: true
+  vars_files:
+    - group_vars/vault.yml
   roles:
     - common
     - docker

@@ -88,5 +88,11 @@ ansible-collections: $(ANSIBLE_BIN)
 	$(ANSIBLE_GALAXY_BIN) collection install -r $(ANSIBLE_REQUIREMENTS)
 
 ansible-deploy: ansible-collections $(ANSIBLE_BIN) $(ANSIBLE_TO_CREATE) $(ANSIBLE_VAULT)
-	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE_BIN) --ask-vault-pass -i $(ANSIBLE_INVENTORY) $(ANSIBLE_PLAYBOOK)
+	@deployment_host_ip=$$(curl -4 -fsS https://api.ipify.org); \
+	test -n "$$deployment_host_ip"; \
+	echo "Deploying host public IP: $$deployment_host_ip"; \
+	ANSIBLE_CONFIG=$(ANSIBLE_CFG) $(ANSIBLE_BIN) \
+		--ask-vault-pass -i $(ANSIBLE_INVENTORY) \
+		--extra-vars "deployment_host_ip=$$deployment_host_ip" \
+		$(ANSIBLE_PLAYBOOK)
 # ------------------------------
