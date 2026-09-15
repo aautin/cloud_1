@@ -17,7 +17,7 @@ NGINX_CERT_KEY = $(NGINX_DIR)/certs/server.key
 NGINX_CERT_CRT = $(NGINX_DIR)/certs/server.crt
 NGINX_CERTS    = $(NGINX_CERT_KEY) $(NGINX_CERT_CRT)
 
-.PHONY: local-down local-recreate local-rm-volumes local-deploy \
+.PHONY: local-down local-recreate local-rm-volumes local-hosts local-deploy \
 		ansible-encrypt ansible-collections ansible-deploy 
 
 
@@ -48,6 +48,20 @@ $(ANSIBLE_VAULT): $(ANSIBLE_BIN)
 
 
 # ---------- LOCAL DEPLOYMENT ----------
+local-hosts:
+	@set -eu; \
+	app_domain=$$(sed -n 's/^APP_DOMAIN=//p' .env | head -n 1 | sed 's/^['"'"']//; s/['"'"']$$//'); \
+	if [ -z "$$app_domain" ]; then \
+		echo "APP_DOMAIN must be set in .env" >&2; \
+		exit 1; \
+	fi; \
+	if awk -v domain="$$app_domain" '$$1 !~ /^#/ { for (field = 2; field <= NF; field++) if ($$field == domain) found = 1 } END { exit !found }' /etc/hosts; then \
+		echo "$$app_domain already exists in /etc/hosts"; \
+	else \
+		echo "Adding $$app_domain to /etc/hosts"; \
+		printf '127.0.0.1 %s\n' "$$app_domain" | sudo tee -a /etc/hosts >/dev/null; \
+	fi
+
 local-down:
 	docker compose down --remove-orphans
 
@@ -55,7 +69,7 @@ local-rm-volumes: local-down
 	docker volume rm cloud_1_db_data
 	docker volume rm cloud_1_wordpress_data
 
-local-deploy: $(NGINX_CERTS)
+local-deploy: local-hosts $(NGINX_CERTS)
 	docker compose up -d --build
 
 local-logs:
