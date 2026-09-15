@@ -47,7 +47,7 @@ fi
 if ! wp --allow-root core is-installed --path=/var/www/html; then
     wp --allow-root core install \
         --path=/var/www/html \
-        --url="$WORDPRESS_URL" \
+        --url="https://$APP_DOMAIN/" \
         --title="$WORDPRESS_TITLE" \
         --admin_user="$WORDPRESS_ADMIN_USER" \
         --admin_password="$WORDPRESS_ADMIN_PASSWORD" \

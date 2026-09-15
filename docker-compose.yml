@@ -32,7 +32,7 @@ services:
       retries: 12
   
   nginx:
-    image: docker.io/library/nginx:latest
+    image: docker.io/library/nginx:1.31.5
     restart: unless-stopped
     env_file: .env
     networks:
@@ -41,18 +41,18 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./services/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./services/nginx/conf.d/default.conf.template:/etc/nginx/templates/default.conf.template:ro
       - ./services/nginx/certs:/etc/nginx/certs:ro
     depends_on:
       wordpress:
         condition: service_healthy
 
   phpMyAdmin:
-    image: phpmyadmin/phpmyadmin:latest
+    image: docker.io/library/phpmyadmin:5.2.3
     restart: unless-stopped
     environment:
       PMA_HOST: db
-      PMA_ABSOLUTE_URI: https://localhost/phpmyadmin/
+      PMA_ABSOLUTE_URI: https://${APP_DOMAIN}/phpmyadmin/
     networks:
       - cloud_1
     depends_on:

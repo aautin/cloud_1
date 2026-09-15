@@ -1,13 +1,13 @@
 server {
     listen 80;
-    server_name localhost;
+    server_name ${APP_DOMAIN};
 
-    return 308 https://$host$request_uri; 
+    return 308 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name localhost;
+    server_name ${APP_DOMAIN};
 
     ssl_certificate /etc/nginx/certs/server.crt;
     ssl_certificate_key /etc/nginx/certs/server.key;
