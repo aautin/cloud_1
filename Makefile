@@ -34,7 +34,7 @@ $(NGINX_CERTS):
 
 # ---------- ANSIBLE PREDEPLOYMENT ----------
 $(ANSIBLE_BIN):
-	uv sync
+	UV_LINK_MODE=copy uv sync
 
 $(ANSIBLE_TO_CREATE):
 	@echo "Please edit $@ to set your configuration."

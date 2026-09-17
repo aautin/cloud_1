@@ -1,5 +1,4 @@
 app_dir: /opt/cloud_1
-app_domain: domain_name_or_ip
 
 wordpress_title:
 wordpress_admin_user:
