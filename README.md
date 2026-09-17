@@ -85,21 +85,25 @@ This project does not provision cloud instances, manage provider billing, or sto
 ```text
 .
 ├── ansible/                  # Ansible deployment configuration
+│   │
 │   ├── roles/                # Reusable task groups for deployment responsibilities
-│   ├── group_vars/           # Inventory variables and encrypted secrets
+│   ├── group_vars/           # Hosts-shared inventory variables
+│   │   ├── all.yml           # Cleartext variables 
+│   │   └── vault.yml         # Encrypted variables (sensitive data)
+│   ├── host_vars/            # Variables specific to each inventory host
+│   │
 │   ├── templates/app.env.j2  # Template for the generated .env file on the managed node
+│   │
 │   ├── inventory.ini         # List of the managed nodes with SSH connection details
 │   ├── requirements.yml      # Ansible collection dependencies
 │   └── site.yml              # Main playbook, listing the roles to run
-|
+│
 ├── services/                 # Container-specific files and configurations
 ├── docker-compose.yml        # Containers, networks, volumes, healthchecks, and ports
 ├── Makefile                  # Local Compose and remote Ansible commands
-|
+│
 ├── pyproject.toml            # Python project metadata and Ansible dependency
-├── .python-version           # Python version for the control-node environment
-|
-└── SUBJECT.md                # Project requirements and expected architecture
+└── .python-version           # Python version for the control-node environment
 ```
 
 ## Configuration
@@ -143,7 +147,14 @@ cp ansible/inventory.ini.example ansible/inventory.ini
 cp ansible/group_vars/all.yml.example ansible/group_vars/all.yml
 ```
 
-Edit the inventory with the real host, SSH user, and private-key path. Edit `ansible/group_vars/all.yml` with the domain, WordPress metadata, and database name/user. Create the encrypted Vault file for the three password variables:
+Edit the inventory with the real host, SSH user, and private-key path. The first column of each host entry is its inventory name. Create one host variable file for every host, using the exact inventory name in the filename:
+
+```sh
+cp ansible/host_vars/hostname.yml.example ansible/host_vars/server_one.yml
+cp ansible/host_vars/hostname.yml.example ansible/host_vars/server_two.yml
+```
+
+Set a different `app_domain` in each file. For example, `ansible/host_vars/server_one.yml` applies only to the host named `server_one` in `inventory.ini`. Edit `ansible/group_vars/all.yml` with values shared by all hosts, such as the application directory and WordPress metadata. Create the encrypted Vault file for the three password variables:
 
 ```sh
 make ansible-deploy
@@ -158,6 +169,8 @@ To deploy to several machines, put all of them in the `[cloud]` inventory group.
 server_one ansible_host=203.0.113.10 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/cloud_one
 server_two ansible_host=203.0.113.11 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/cloud_one
 ```
+
+The `ansible-deploy` target checks that each inventory host has a matching `ansible/host_vars/<hostname>.yml` file before starting. Use `--limit` with Ansible to deploy to one host when needed; its host variable file must still exist.
 
 ## TLS and Security
 

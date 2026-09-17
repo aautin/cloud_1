@@ -7,6 +7,7 @@ ANSIBLE_CFG          = ansible/ansible.cfg
 ANSIBLE_VAULT        = ansible/group_vars/vault.yml
 ANSIBLE_REQUIREMENTS = ansible/requirements.yml
 ANSIBLE_TO_CREATE    = ansible/group_vars/all.yml ansible/inventory.ini
+ANSIBLE_HOST_VARS    = $(wildcard ansible/host_vars/*.yml)
 
 ANSIBLE_BIN        = $(VENV)/bin/ansible-playbook
 ANSIBLE_VAULT_BIN  = $(VENV)/bin/ansible-vault
@@ -81,13 +82,21 @@ local-recreate:
 
 
 # ---------- ANSIBLE DEPLOYMENT ----------
+ansible-check-host_vars:
+	@for host in $$(awk '/^\[/{next} NF && $$1 !~ /^#/{print $$1}' $(ANSIBLE_INVENTORY)); do \
+		test -f "ansible/host_vars/$$host.yml" || { \
+			echo "Missing host_vars file: $$host.yml" >&2; \
+			exit 1; \
+		}; \
+	done
+
 ansible-encrypt: $(ANSIBLE_BIN) $(ANSIBLE_VAULT)
 	$(ANSIBLE_VAULT_BIN) encrypt $(ANSIBLE_VAULT)
 
 ansible-collections: $(ANSIBLE_BIN)
 	$(ANSIBLE_GALAXY_BIN) collection install -r $(ANSIBLE_REQUIREMENTS)
 
-ansible-deploy: ansible-collections $(ANSIBLE_BIN) $(ANSIBLE_TO_CREATE) $(ANSIBLE_VAULT)
+ansible-deploy: ansible-collections $(ANSIBLE_BIN) $(ANSIBLE_TO_CREATE) $(ANSIBLE_VAULT) ansible-check-host_vars
 	@deployment_host_ip=$$(curl -4 -fsS https://api.ipify.org); \
 	test -n "$$deployment_host_ip"; \
 	echo "Deploying host public IP: $$deployment_host_ip"; \
