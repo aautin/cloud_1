@@ -9,9 +9,9 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
+      interval: 5s
+      timeout: 10s
+      retries: 50
   
   wordpress:
     build:
@@ -27,9 +27,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
+      interval: 5s
+      timeout: 10s
+      retries: 50
   
   nginx:
     image: docker.io/library/nginx:1.31.5
